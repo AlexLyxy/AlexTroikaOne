@@ -38,8 +38,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         binding.bGet.setOnClickListener {
-            //getDogMessage()
-            //getCoin()
+            getDogMessage()
+            getCoin()
             getWeatherData(city = "London")
             init()
             model.liveDataList.observe(this@MainActivity) {
@@ -56,7 +56,9 @@ class MainActivity : AppCompatActivity() {
         rcView.adapter = adapter
     }
 
-    /*private fun getCoin() {
+    //    SITE COIN
+
+    private fun getCoin() {
         //val url = "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR"
         val url = "https://min-api.cryptocompare.com/data/top/totalvolfull?limit=10&tsym=USD"
         val queue = Volley.newRequestQueue(this)
@@ -123,6 +125,9 @@ class MainActivity : AppCompatActivity() {
         //for (i in 0 until coinArray.length()) {
         for (i in 0 until 2) {
             val item = DoCoWeModel(
+                dogFaceOne = "",
+                dogFaceTwo = "",
+                dogFaceThree = "",
                 coinArray
                     .getJSONObject(0)
                     .getJSONObject("CoinInfo")
@@ -138,154 +143,167 @@ class MainActivity : AppCompatActivity() {
                 coinArray
                     .getJSONObject(0)
                     .getJSONObject("CoinInfo")
-                    .getString("ImageUrl")
-                )
+                    .getString("ImageUrl"),
+                time = "26.09.2023",
+                //day.getString("date"),
+                condition = "Clear",
+                //day.getJSONObject("day").getJSONObject("condition").getString("text"),
+                currentTemp = "25",
+                //day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
+                imageURL = "ImageUrl"
+                //day.getJSONObject("day").getJSONObject("condition").getString("icon")
+            )
             listCoin.add(item)
             Log.d("MyLog", "CoinListLast: $listCoin")
         }
         model.liveDataList.value = listCoin
         return listCoin
-    }  */
+    }
+
+    //   SITE WEATHER
 
     private fun getWeatherData(city: String) {
-         val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
-                 API_KEY +
-                 "&q=" +
-                 city +
-                 "&days=" +
-                 "3" +
-                 "&aqi=no&alerts=no"
-         val queue = Volley.newRequestQueue(this)
-         val request = StringRequest(
-             Request.Method.GET,
-             url,
-             { result ->
-                 parseWeatherData(result)
+        val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
+                API_KEY +
+                "&q=" +
+                city +
+                "&days=" +
+                "3" +
+                "&aqi=no&alerts=no"
+        val queue = Volley.newRequestQueue(this)
+        val request = StringRequest(
+            Request.Method.GET,
+            url,
+            { result ->
+                parseWeatherData(result)
 
-                 Log.d("MyLog", "Wether: $result")
-             },
-             { error ->
-                 Log.d("MyLog", "Volley error: $error")
-             }
-         )
-         queue.add(request)
-     }
-
-     private fun parseWeatherData(result: String) {
-         val mainObjectWe = JSONObject(result)
-         Log.d("MyLog", "MainObjectWeather: $mainObjectWe")
-         parseDays(mainObjectWe)
-     }
-
-     private fun parseDays(mainObjectWe: JSONObject): List<DoCoWeModel> {
-         val listWe = ArrayList<DoCoWeModel>()
-         val daysArray = mainObjectWe.getJSONObject("forecast").getJSONArray("forecastday")
-
-         for (i in 0 until daysArray.length()){
-         //for (i in 0 until 2) {
-             val day = daysArray[i] as JSONObject
-             val item = DoCoWeModel(
-               /*  dogFaceOne = "",
-                 dogFaceTwo = "",
-                 dogFaceThree = "",
-                 coinName = "BitCoin",
-                 coinFullName = "",
-                 coinImageUrl = "",
-                 coinUrl = "", */
-                 day.getString("date"),
-                 day.getJSONObject("day").getJSONObject("condition").getString("text"),
-                 day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
-                 day.getJSONObject("day").getJSONObject("condition").getString("icon")
-             )
-             listWe.add(item)
-
-             val time = day.getString("date")
-             val condition = day.getJSONObject("day").getJSONObject("condition").getString("text")
-             val currentTemp =
-                 day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString()
-             val imageURL = day.getJSONObject("day").getJSONObject("condition").getString("icon")
-
-             Log.d("MyLog", "Date: $time ")
-             Log.d("MyLog", "Condition: $condition")
-             Log.d("MyLog", "CurrentTemp: $currentTemp")
-             Log.d("MyLog", "ImageURL: $imageURL")
-
-             Log.d("MyLog", "WeatherListLast: $listWe")
-         }
-         model.liveDataList.value = listWe
-         return listWe
-     }
-    /*
-        private fun getDogMessage() {
-            //val url = "https://dog.ceo/api/breeds/image/random"
-            //val url = "https://dog.ceo/api/breed/hound/afghan/images"
-            val url = "https://dog.ceo/api/breed/hound/images"
-            val queue = Volley.newRequestQueue(this)
-            val request = StringRequest(Request.Method.GET,
-                url,
-                { message ->
-                    parseDogsData(message)
-                    Log.d("MyLog", "MessDog: $message")
-                    val mainObjectDog = JSONObject(message)
-                    val dogsFace = mainObjectDog.getJSONArray("message")
-
-                    val dogsFaceOne = dogsFace.getString(0)
-                    val dogsFaceTwo = dogsFace.getString(1)
-                    val dogsFaceThree = dogsFace.getString(2)
-
-                    Log.d("MyLog", "MessDogArray: $dogsFace")
-
-                    Log.d("MyLog", "MessDogArrayOne: $dogsFaceOne")
-                    Log.d("MyLog", "MessDogArrayTwo: $dogsFaceTwo")
-                    Log.d("MyLog", "MessDogArrayThree: $dogsFaceThree")
-
-                },
-                { error ->
-                    Log.d("MyLog", "Volley error: $error")
-                }
-            )
-            queue.add(request)
-        }
-
-        private fun parseDogsData(message: String) {
-            val mainObjectDog = JSONObject(message)
-            Log.d("MyLog", "MainObjectDog: $mainObjectDog")
-            parseDogs(mainObjectDog)
-        }
-
-        private fun parseDogs(mainObjectDog: JSONObject): List<DoCoWeModel> {
-            val dogArray = mainObjectDog.getJSONArray("message")
-            Log.d("MyLog", "DogArray: $dogArray")
-            val listDog = ArrayList<DoCoWeModel>()
-            // val daysArray = mainObjectWe.getJSONObject("forecast").getJSONArray("forecastday")
-
-            //for (i in 0 until dogArray.length()) {
-            for (i in 0 until 3) {
-                //val day = daysArray[i] as JSONObject
-                val item = DoCoWeModel(
-                    dogArray.getString(0),
-                    dogArray.getString(1),
-                    dogArray.getString(2),
-                    /*coinName = "London",
-                    coinFullName = "FullName",
-                    coinImageUrl = "CoinImageUrl",
-                    coinUrl = "CoinUrl",
-                    time = "26.09.2023",
-                    //day.getString("date"),
-                    condition = "Clear",
-                    //day.getJSONObject("day").getJSONObject("condition").getString("text"),
-                    currentTemp = "25",
-                    //day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
-                    imageURL = "ImageUrl"
-                    //day.getJSONObject("day").getJSONObject("condition").getString("icon")*/
-                )
-
-                listDog.add(item)
-                Log.d("MyLog", "DogListLast: $listDog")
+                Log.d("MyLog", "Wether: $result")
+            },
+            { error ->
+                Log.d("MyLog", "Volley error: $error")
             }
-            model.liveDataList.value = listDog
-            return listDog
-        }  */
+        )
+        queue.add(request)
+    }
+
+    private fun parseWeatherData(result: String) {
+        val mainObjectWe = JSONObject(result)
+        Log.d("MyLog", "MainObjectWeather: $mainObjectWe")
+        parseDays(mainObjectWe)
+    }
+
+    private fun parseDays(mainObjectWe: JSONObject): List<DoCoWeModel> {
+        val listWe = ArrayList<DoCoWeModel>()
+        val daysArray = mainObjectWe.getJSONObject("forecast").getJSONArray("forecastday")
+
+        for (i in 0 until daysArray.length()) {
+            //for (i in 0 until 2) {
+            val day = daysArray[i] as JSONObject
+            val item = DoCoWeModel(
+                dogFaceOne = "",
+                dogFaceTwo = "",
+                dogFaceThree = "",
+                coinName = "BitCoin",
+                coinFullName = "",
+                coinImageUrl = "",
+                coinUrl = "",
+                time = day.getString("date"),
+                condition = day.getJSONObject("day").getJSONObject("condition").getString("text"),
+                currentTemp = day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt()
+                    .toString(),
+                imageURL = day.getJSONObject("day").getJSONObject("condition").getString("icon")
+            )
+            listWe.add(item)
+
+            val time = day.getString("date")
+            val condition = day.getJSONObject("day").getJSONObject("condition").getString("text")
+            val currentTemp =
+                day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString()
+            val imageURL = day.getJSONObject("day").getJSONObject("condition").getString("icon")
+
+            Log.d("MyLog", "Date: $time ")
+            Log.d("MyLog", "Condition: $condition")
+            Log.d("MyLog", "CurrentTemp: $currentTemp")
+            Log.d("MyLog", "ImageURL: $imageURL")
+
+            Log.d("MyLog", "WeatherListLast: $listWe")
+        }
+        model.liveDataList.value = listWe
+        return listWe
+    }
+
+    //    SITE DOGS
+
+    private fun getDogMessage() {
+        //val url = "https://dog.ceo/api/breeds/image/random"
+        //val url = "https://dog.ceo/api/breed/hound/afghan/images"
+        val url = "https://dog.ceo/api/breed/hound/images"
+        val queue = Volley.newRequestQueue(this)
+        val request = StringRequest(Request.Method.GET,
+            url,
+            { message ->
+                parseDogsData(message)
+                Log.d("MyLog", "MessDog: $message")
+                val mainObjectDog = JSONObject(message)
+                val dogArray = mainObjectDog.getJSONArray("message")
+
+                val dogsFaceOne = dogArray.getString(0)
+                val dogsFaceTwo = dogArray.getString(1)
+                val dogsFaceThree = dogArray.getString(2)
+
+                Log.d("MyLog", "MessDogArray: $dogArray")
+
+                Log.d("MyLog", "MessDogArrayOne: $dogsFaceOne")
+                Log.d("MyLog", "MessDogArrayTwo: $dogsFaceTwo")
+                Log.d("MyLog", "MessDogArrayThree: $dogsFaceThree")
+
+            },
+            { error ->
+                Log.d("MyLog", "Volley error: $error")
+            }
+        )
+        queue.add(request)
+    }
+
+    private fun parseDogsData(message: String) {
+        val mainObjectDog = JSONObject(message)
+        Log.d("MyLog", "MainObjectDog: $mainObjectDog")
+        parseDogs(mainObjectDog)
+    }
+
+    private fun parseDogs(mainObjectDog: JSONObject): List<DoCoWeModel> {
+        val dogArray = mainObjectDog.getJSONArray("message")
+        Log.d("MyLog", "DogArray: $dogArray")
+        val listDog = ArrayList<DoCoWeModel>()
+        // val daysArray = mainObjectWe.getJSONObject("forecast").getJSONArray("forecastday")
+
+        //for (i in 0 until dogArray.length()) {
+        for (i in 0 until 3) {
+            //val day = daysArray[i] as JSONObject
+            val item = DoCoWeModel(
+                dogArray.getString(0),
+                dogArray.getString(1),
+                dogArray.getString(2),
+                coinName = "London",
+                coinFullName = "FullName",
+                coinImageUrl = "CoinImageUrl",
+                coinUrl = "CoinUrl",
+                time = "26.09.2023",
+                //day.getString("date"),
+                condition = "Clear",
+                //day.getJSONObject("day").getJSONObject("condition").getString("text"),
+                currentTemp = "25",
+                //day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
+                imageURL = "ImageUrl"
+                //day.getJSONObject("day").getJSONObject("condition").getString("icon")
+            )
+
+            listDog.add(item)
+            Log.d("MyLog", "DogListLast: $listDog")
+        }
+        model.liveDataList.value = listDog
+        return listDog
+    }
 }
 
 
